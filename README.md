@@ -17,7 +17,7 @@ protected with LUKS full-disk encryption.
 
 ### 1. Boot the NixOS installer
 
-Download the NixOS ISO from https://nixos.org/download and boot the VM from it.
+Download the NixOS minimal ISO from https://nixos.org/download and boot the VM from it.
 
 ### 2. Partition the disk
 
