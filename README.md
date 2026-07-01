@@ -1,6 +1,6 @@
 # nixos-config
 
-Personal NixOS configuration managed with Flakes.
+NixOS configuration managed with Flakes.
 
 ## Hosts
 
@@ -17,7 +17,7 @@ protected with LUKS full-disk encryption.
 
 ### 1. Boot the NixOS installer
 
-Download the NixOS minimal ISO from https://nixos.org/download and boot the VM from it.
+Download the NixOS minimal ISO from https://nixos.org/download and boot the VM from it, and enter the root-user shell with `sudo -i`.
 
 ### 2. Partition the disk
 
