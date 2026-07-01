@@ -55,8 +55,10 @@ else
     PART_ROOT="${DISK}2"
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 REPO_URL="https://github.com/dccn-tg/nixos-config"
-REPO_DIR="/mnt/etc/nixos/nixos-config"
+REPO_DIR=$(cd "$SCRIPT_DIR/.." && git rev-parse --show-toplevel || "")
 
 # ---------------------------------------------------------------------------
 # 2. Collect secrets up front (nothing is written to disk or echoed)
@@ -133,8 +135,10 @@ mkfs.xfs -L nixos /dev/mapper/cryptroot
 ok "FAT32 ESP and XFS root formatted"
 
 # ---------------------------------------------------------------------------
-# 7. Mount filesystems
+# 7. Mount filesystems (wait for udev to settle)
 # ---------------------------------------------------------------------------
+
+udevadm settle
 
 info "Mounting filesystems"
 mount /dev/disk/by-label/nixos /mnt
@@ -153,11 +157,12 @@ ok "Hardware configuration written to /mnt/etc/nixos/"
 # ---------------------------------------------------------------------------
 # 9. Clone this repository
 # ---------------------------------------------------------------------------
-
-info "Cloning nixos-config into $REPO_DIR"
-mkdir -p /mnt/etc/nixos
-git clone "$REPO_URL" "$REPO_DIR"
-ok "Repository cloned"
+if [ "$REPO_DIR" == "" ]; then
+    REPO_DIR="/mnt/etc/nixos/nixos-config"
+    info "Cloning nixos-config into $REPO_DIR"
+    git clone "$REPO_URL" "$REPO_DIR"
+    ok "Repository cloned"
+fi
 
 # ---------------------------------------------------------------------------
 # 10. Copy generated hardware configuration into the repo
