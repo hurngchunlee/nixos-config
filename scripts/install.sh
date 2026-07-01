@@ -156,7 +156,7 @@ ok "Hardware configuration written to /mnt/etc/nixos/"
 
 info "Cloning nixos-config into $REPO_DIR"
 mkdir -p /mnt/etc/nixos
-nix-shell -p git --run "git clone '$REPO_URL' '$REPO_DIR'"
+git clone "$REPO_URL" "$REPO_DIR"
 ok "Repository cloned"
 
 # ---------------------------------------------------------------------------
