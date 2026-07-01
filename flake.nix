@@ -23,6 +23,7 @@
 
     nixosConfigurations = {
       dccnlpt001 = mkHost ./hosts/dccnlpt001.nix;
+      vm001 = mkHost ./hosts/vm001.nix;
     };
   };
 

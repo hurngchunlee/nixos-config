@@ -19,8 +19,6 @@
     usbutils
     pciutils
     nvme-cli
-    lm_sensors
-    acpi
 
   ];
 }
