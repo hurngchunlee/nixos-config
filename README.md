@@ -98,7 +98,7 @@ nixos-install --no-root-passwd --flake /mnt/etc/nixos/nixos-config#vm001
 
 to skip setting root password for unattended installation.
 
-### 11. Set specific user password before reboot
+### 10. Set specific user password before reboot
 
 For example, to set the password for user `honlee`:
 
@@ -106,7 +106,7 @@ For example, to set the password for user `honlee`:
 nixos-enter --root /mnt -c 'passwd honlee'
 ```
 
-### 10. Reboot
+### 11. Reboot
 
 ```bash
 reboot
