@@ -187,6 +187,7 @@ fi
 info "Copying hardware configuration to $REPO_DIR/hardware/generated/${HOSTNAME}.nix"
 cp /mnt/etc/nixos/hardware-configuration.nix \
    "$REPO_DIR/hardware/generated/${HOSTNAME}.nix"
+git add "$REPO_DIR/hardware/generated/${HOSTNAME}.nix"
 ok "Hardware config copied"
 
 # ---------------------------------------------------------------------------
