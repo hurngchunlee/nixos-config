@@ -33,6 +33,8 @@ info()  { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
 ok()    { printf '\033[1;32m  ✓\033[0m %s\n' "$*"; }
 die()   { printf '\n\033[1;31mERROR:\033[0m %s\n' "$*" >&2; exit 1; }
 
+swapGB=$(awk '/MemTotal/ {printf "%d", $2*1.2/1024/1024}' /proc/meminfo)
+
 # ---------------------------------------------------------------------------
 # 1. Input validation
 # ---------------------------------------------------------------------------
@@ -50,9 +52,11 @@ DISK="${2:-}"
 if [[ "$DISK" =~ nvme|loop|mmcblk ]]; then
     PART_ESP="${DISK}p1"
     PART_ROOT="${DISK}p2"
+    PART_SWAP="${DISK}p3"
 else
     PART_ESP="${DISK}1"
     PART_ROOT="${DISK}2"
+    PART_SWAP="${DISK}3"
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -86,6 +90,7 @@ printf '         Hostname : %s\n' "$HOSTNAME"
 printf '         Disk     : %s\n' "$DISK"
 printf '         ESP      : %s\n' "$PART_ESP"
 printf '         Root     : %s  (LUKS → /dev/mapper/cryptroot → XFS "nixos")\n' "$PART_ROOT"
+printf '         Swap     : %s  (%d GB)\n' "$PART_SWAP" "$swapGB"
 printf '\n'
 read -rp "Type YES in uppercase to continue: " CONFIRM
 [[ "$CONFIRM" == "YES" ]] || { echo "Aborted."; exit 0; }
@@ -98,7 +103,8 @@ info "Partitioning $DISK"
 parted -s "$DISK" -- mklabel gpt
 parted -s "$DISK" -- mkpart ESP fat32 1MB 512MB
 parted -s "$DISK" -- set 1 esp on
-parted -s "$DISK" -- mkpart primary 512MB 100%
+parted -s "$DISK" -- mkpart primary 512MB -${swapGB}GB
+parted -s "$DISK" -- mkpart swap linux-swap -${swapGB}GB 100%
 ok "Partitions created"
 
 # Give the kernel a moment to register the new partition table.
@@ -134,6 +140,10 @@ mkfs.fat -F 32 -n boot "$PART_ESP"
 mkfs.xfs -L nixos /dev/mapper/cryptroot
 ok "FAT32 ESP and XFS root formatted"
 
+mkswap -L swap "$PART_SWAP"
+swapon "$PART_SWAP"
+ok "Swap partition enabled"
+
 # ---------------------------------------------------------------------------
 # 7. Mount filesystems (wait for udev to settle)
 # ---------------------------------------------------------------------------
@@ -149,6 +159,12 @@ ok "Filesystems mounted at /mnt"
 # ---------------------------------------------------------------------------
 # 8. Generate hardware configuration
 # ---------------------------------------------------------------------------
+
+info "Checking host specific configuration"
+if [ ! -f "$REPO_DIR/hosts/${HOSTNAME}.nix" ]; then
+    sed s/@@HOSTNAME@@/${HOSTNAME}/g "$REPO_DIR/hosts/host.template" > "$REPO_DIR/hosts/${HOSTNAME}.nix"
+    git add "$REPO_DIR/hosts/${HOSTNAME}.nix" 
+fi
 
 info "Generating hardware configuration"
 nixos-generate-config --root /mnt
@@ -171,6 +187,7 @@ fi
 info "Copying hardware configuration to $REPO_DIR/hardware/generated/${HOSTNAME}.nix"
 cp /mnt/etc/nixos/hardware-configuration.nix \
    "$REPO_DIR/hardware/generated/${HOSTNAME}.nix"
+git add "$REPO_DIR/hardware/generated/${HOSTNAME}.nix"
 ok "Hardware config copied"
 
 # ---------------------------------------------------------------------------

@@ -2,14 +2,13 @@
 
 NixOS configuration managed with Flakes.
 
-## Hosts
-
-| Hostname | Description |
-|---|---|
-| `vm001` | Virtual machine |
-| `dccnlpt001` | Dell Precision 5560 laptop |
-
 ## Installing NixOS with Flake
+
+1. boot with the NixOS installer
+2. clone this repository
+3. run the [`scripts/install.sh`](scripts/install.sh) script which does the steps described below.
+
+---
 
 The following steps walk through a fresh NixOS installation using `vm001` as an example.
 The disk device is `/dev/vda`, the root filesystem is XFS, and the root partition is

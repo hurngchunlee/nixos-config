@@ -2,7 +2,7 @@
   description = "Hong's NixOS configuration";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v1.1.0";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -24,12 +24,21 @@
         ];
       };
 
+    hostFiles = builtins.readDir ./hosts;
+
+    hostNames = builtins.attrNames (
+      nixpkgs.lib.filterAttrs
+        (name: type: type == "regular" && builtins.match ".*\\.nix" name != null)
+        hostFiles
+    );
+
   in {
-
-    nixosConfigurations = {
-      dccnlpt001 = mkHost ./hosts/dccnlpt001.nix;
-      vm001 = mkHost ./hosts/vm001.nix;
-    };
+    nixosConfigurations =
+      builtins.listToAttrs (
+        map (file: {
+          name = builtins.replaceStrings [ ".nix" ] [ "" ] file;
+          value = mkHost (./hosts + "/${file}");
+        }) hostNames
+      );
   };
-
 }
