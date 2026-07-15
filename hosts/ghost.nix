@@ -1,6 +1,6 @@
 {
   imports = [
-    ../hardware/generated/vm001.nix
+    ../hardware/generated/ghost.nix
     ../hardware/custom/gnome-boxes.nix
 
     ../modules/boot.nix

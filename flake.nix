@@ -3,9 +3,13 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.1.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, ... }:
+  outputs = { self, nixpkgs, lanzaboote, ... }:
 
   let
     system = "x86_64-linux";
@@ -15,6 +19,7 @@
         inherit system;
 
         modules = [
+          lanzaboote.nixosModules.lanzaboote
           hostFile
         ];
       };

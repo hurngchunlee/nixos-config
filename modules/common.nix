@@ -19,6 +19,7 @@
     usbutils
     pciutils
     nvme-cli
+    sbctl
 
   ];
 }
